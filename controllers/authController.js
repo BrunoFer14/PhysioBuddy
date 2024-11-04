@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs');
 const authService = require('../services/authService');
 const db = require('../data/db'); // Import the raw SQL functions
+const { V4 } = require('paseto');
 
 // Register a new user
 async function register(req, res) {
@@ -25,28 +26,21 @@ async function register(req, res) {
 
 // Login a user and generate a token
 async function login(req, res) {
-  try{
-
-    const { email, password } = req.body;
-    
-    const user = await db.findUser(email);
-    if (!user) {
-      return res.status(401).json({ error: 'user not found' });
-    }
-    
-    const isMatch = await bcrypt.compare(password, user.passwordhash);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid password' });
-    }
-    
-    // Generate a token
-    const token = await authService.generateToken({ email });
-    res.json({ token });
+  const { email, password } = req.body;
+  
+  const user = await db.findUser(email);
+  if (!user) {
+    return res.status(401).json({ error: 'user not found' });
   }
-  catch(err){
-    console.log(err)
-    res.json({ error: 'Erro não previsto' });
+  
+  const isMatch = await bcrypt.compare(password, user.passwordhash);
+  if (!isMatch) {
+    return res.status(401).json({ error: 'Invalid password' });
   }
+  
+  // Generate a token
+  const token = await authService.generateToken(email);
+  res.json({ token });
 }
 
 // Verify token validity

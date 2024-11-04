@@ -1,29 +1,15 @@
 require('dotenv').config();
 const express = require('express');
-const authController = require('./controllers/authController');
+const authRoutes = require('./routes/authRoutes')
+const errorHandler = require('./middlewares/errorMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use('/api', authRoutes)
 
-//creating our custom async Error handling function 
-// function asyncErrorHandle(fn) {
-//   return (req,res,next) => {
-//     routeFunction(req, res, next).catch(next);
-//   };
-// }
-
-// Routes
-app.post('/auth/register', authController.register);
-app.post('/auth/login', authController.login);
-app.get('/auth/verify', authController.verifyToken);
-
-// app.use(errorHandlingMiddleware)
-
-// function errorHandlingMiddleware(err,req,res,next){
-//   console.log('Error Encountered: ',err)
-// }
+app.use(errorHandler)
 
 // Start the server
 app.listen(PORT, () => {
