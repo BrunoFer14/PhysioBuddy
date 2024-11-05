@@ -2,8 +2,6 @@
 const { V4 } = require('paseto');
 require('dotenv').config();
 
-const secretKey = Buffer.from(process.env.PASETO_SECRET_KEY, 'utf-8');
-
 // Generate a PASETO token with user payload
 async function generateToken(email) {
   const key = await V4.generateKey('public')
@@ -13,10 +11,11 @@ async function generateToken(email) {
 
 // Verify a PASETO token
 async function verifyToken(token) {
-  return await V4.decrypt(token, secretKey, {
-    audience: 'auth-service',
-    issuer: 'auth-microservice',
-  });
+    const payload = await V4.verify(token, publicKey, {
+      audience: 'auth-service',
+      issuer: 'auth-microservice',
+    });
+    return payload;  // Payload includes email and other claims if valid
 }
 
 module.exports = { 
